@@ -36,7 +36,7 @@ python main.py
 ---
 
 ## 📜 Licença
-Este projeto está licenciado sob a [MIT License.](https://chatgpt.com/c/686e5a5f-a8d4-8013-8ccb-f9b14df2e5a6)
+This project is licensed under the [MIT License](LICENSE).
 
 
 ---
