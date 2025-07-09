@@ -16,6 +16,13 @@ class Hunter:
         self.hp = self.vitality * 10 + 50 # HP inicial baseado na vitalidade
         self.mp = self.intelligence * 5 + 20 # MP inicial baseado na inteligência
 
+        self.daily_training_log = {
+            "flexões": 0,
+            "abdominais": 0,
+            "agachamentos": 0,
+            "corrida": 0
+        }
+
     def display_status(self):
         print(f"\n--- Status de {self.name} ---")
         print(f"Nível: {self.level}")
@@ -30,6 +37,50 @@ class Hunter:
         print(f"Inteligência (INT): {self.intelligence}")
         print("----------------------------")
 
+    # Sistema de treino
+    def daily_quest(self, workout, sets):
+        DAILY_REPS = 100  # Repetições
+        DAILY_RUNNING = 10  # Em Km
+
+        XP_PER_REP_TRAINING = 50
+        XP_PER_RUN_TRAINING = 100
+
+        # Treinos em Repetições
+        workout_reps = ["flexões", "abdominais", "agachamentos"]
+        # Treinos em Distância
+        workout_meters = ["corrida", "caminhada"]
+
+        if workout not in self.daily_training_log:
+            print("Treino desconhecido.")
+            return
+
+        # Soma ao histórico
+        self.daily_training_log[workout] += sets
+        total = self.daily_training_log[workout]
+
+        # Verifica tipo de treino e metas
+        if workout in workout_reps:
+            meta = DAILY_REPS
+            xp_por_treino = XP_PER_REP_TRAINING
+            unidade = "reps"
+        elif workout in workout_meters:
+            meta = DAILY_RUNNING
+            xp_por_treino = XP_PER_RUN_TRAINING
+            unidade = "km"
+        else:
+            print("Tipo de treino inválido.")
+            return
+
+        # Verifica quantas vezes completou a meta
+        completou_vezes = total // meta
+
+        if completou_vezes > 0:
+            xp_total = completou_vezes * xp_por_treino
+            print(f"\n✅ {workout.title()} completo {completou_vezes}x! Ganhou {xp_total} XP.")
+            self.gain_xp(xp_total)
+        else:
+            print(f"{workout.title()}: {total}/{meta} {unidade}")
+        
     def gain_xp(self, amount):
         print(f"\nVocê ganhou {amount} de XP!")
         self.current_xp += amount
@@ -117,19 +168,46 @@ class Hunter:
 
 # --- Execução do Simulador ---
 def run_simulation():
-    hunter_name = input("Digite o nome do seu caçador: ")
+    hunter_name = input("Nome: ")
     player = Hunter(hunter_name)
     player.display_status()
 
     while True:
         print("\nO que você quer fazer?")
-        print("1. Ganhar XP (Completar Missão/Dungeon)")
-        print("2. Ver Status")
-        print("3. Sair")
+        print("1. Treino Diário")
+        print("2. Ganhar XP (Completar Missão/Dungeon)")
+        print("3. Ver Status")
+        print("4. Sair")
 
         choice = input("Sua escolha: ")
 
         if choice == '1':
+            print("\nEscolha o treino (progresso do dia):")
+            print(f"[1] Flexões: {player.daily_training_log['flexões']}/100 reps")
+            print(f"[2] Abdominais: {player.daily_training_log['abdominais']}/100 reps")
+            print(f"[3] Agachamentos: {player.daily_training_log['agachamentos']}/100 reps")
+            print(f"[4] Corrida: {player.daily_training_log['corrida']}/10 km")
+            treino_opcao = input("Treino: ")
+
+            treinos = {
+                '1': 'flexões',
+                '2': 'abdominais',
+                '3': 'agachamentos',
+                '4': 'corrida'
+            }
+
+            treino_escolhido = treinos.get(treino_opcao)
+            if not treino_escolhido:
+                print("Opção inválida.")
+                continue
+
+            try:
+                sets = int(input(f"Quantos {'km' if treino_escolhido == 'quilometros' else 'repetições'} você fez? "))
+                player.daily_quest(treino_escolhido, sets)
+            except ValueError:
+                print("Digite um número válido.")
+
+        elif choice == '2':
             try:
                 xp_gained_str = input("Quanto XP você ganhou? ")
                 if not xp_gained_str.isdigit():
@@ -143,9 +221,11 @@ def run_simulation():
                 player.gain_xp(xp_gained)
             except ValueError:
                 print("Entrada inválida. Digite um número para o XP.")
-        elif choice == '2':
-            player.display_status()
+        # Aplicar lógica da opção 2 (Missões e Dungeons)
+
         elif choice == '3':
+            player.display_status()
+        elif choice == '4':
             print("Saindo do simulador. Até a próxima caçada!")
             break
         else:
